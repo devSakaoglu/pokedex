@@ -21,9 +21,8 @@ import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
-import { Link, useNavigate } from "react-router-dom";
-import { getAllPokemons } from "../Api";
-import {Colors} from "../Compenents/Types"
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { getItems } from "../../Api";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -58,58 +57,22 @@ function stableSort(array, comparator) {
 //Todo propertileri gir
 const headCells = [
   {
-    id: "Pokemon_Name",
+    id: "itemId",
+    numeric: false,
+    disablePadding: false,
+    label: "ID",
+  },
+  {
+    id: "itemName",
     numeric: false,
     disablePadding: false,
     label: "Name",
   },
   {
-    id: "Type",
+    id: "itemEffect",
     numeric: false,
     disablePadding: false,
-    label: "Type",
-  },
-  {
-    id: "Total",
-    numeric: true,
-    disablePadding: false,
-    label: "Total",
-  },
-  {
-    id: "HP",
-    numeric: true,
-    disablePadding: false,
-    label: "HP",
-  },
-  {
-    id: "Attack",
-    numeric: true,
-    disablePadding: false,
-    label: "Attack",
-  },
-  {
-    id: "Defense",
-    numeric: true,
-    disablePadding: false,
-    label: "Defense",
-  },
-  {
-    id: "Sp_Atk",
-    numeric: true,
-    disablePadding: false,
-    label: "Sp.Attack",
-  },
-  {
-    id: "Sp_Def",
-    numeric: true,
-    disablePadding: false,
-    label: "Sp.Defense",
-  },
-  {
-    id: "Speed",
-    numeric: true,
-    disablePadding: false,
-    label: "Speed",
+    label: "Effect",
   },
 ];
 
@@ -132,11 +95,12 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            align={ "right"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
+        
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
@@ -196,9 +160,7 @@ function EnhancedTableToolbar(props) {
           variant="h6"
           id="tableTitle"
           component="div"
-        >
-          
-        </Typography>
+        ></Typography>
       )}
 
       {numSelected > 0 ? (
@@ -220,22 +182,26 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function PokemonList() {
+export default function ItemPage() {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("Type");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const  [pokemons, setPokemons] = React.useState([])
+  const [items, setItems] = React.useState([]);
+const {itemType}=useParams()
 
   React.useEffect(() => {
-    getAllPokemons().then((res)=>{
-      console.log(res.data[2])
-      setPokemons(res.data)
-    }).catch((error)=>{console.log(error)});
-  }, []);
-
+    getItems(itemType)
+      .then((res) => {
+        console.log(res);
+     setItems(res)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [itemType]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -245,7 +211,7 @@ export default function PokemonList() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = pokemons.map((n) => n.Pokemon_Name);
+      const newSelected = items.map((n) => n.itemName);
       setSelected(newSelected);
       return;
     }
@@ -289,7 +255,7 @@ export default function PokemonList() {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - pokemons.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - items.length) : 0;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -307,71 +273,48 @@ export default function PokemonList() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={pokemons.length}
+              rowCount={items.length}
             />
             <TableBody>
-              {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-                 rows.sort(getComparator(order, orderBy)).slice() */}
-              {stableSort(pokemons, getComparator(order, orderBy))
+
+              {stableSort(items, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.Pokemon_Name);
+                  const isItemSelected = isSelected(row.itemName);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.Pokemon_Name)}
+                      onClick={(event) => handleClick(event, row.itemName)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.Pokemon_Name}
+                      key={row.itemName}
                       selected={isItemSelected}
                     >
                       <TableCell
+                      align="right"
                         component="th"
                         id={labelId}
                         scope="row"
                         padding="none"
                       >
-                        <Link to={`/PokemonDetail/${row.Pokedex_NO}`}
-                        style={{
-                          display:'flex',
-                          alignItems:"center",
-                          textDecoration:"none",
-                          color:"blue"
 
-                        }}>
-                          {row.Pokemon_Name} <img src={`https://img.pokemondb.net/artwork/${row.Pokemon_Name.toLowerCase()}.jpg`}
-                          style={{
-                            width:30,
-                            height:30,
-                            marginLeft:5
-                          }}>
-                          
-                          </img>
-                        </Link>
+                          {row.itemId}{" "}
+                          <img
+                            src={`https://img.pokemondb.net/sprites/items/${row.itemName.toLowerCase().trim().replaceAll(" ","-").replace("é","e")}.png`}
+                            style={{
+                              width: 30,
+                              height: 30,
+                              marginLeft: 5,
+                            }}
+                          ></img>
                       </TableCell>
-                      <TableCell align="right">{row.Pokemon_Type.split("-").map((item,i)=>(
-                        <span key={i} style={{
-                          textAlign: "center",
-                          width: 90,
-                          backgroundColor: Colors[item],
-                          color: "white",
-                          marginLeft: 10,
-                          padding: 10,
-                          borderRadius: 15,
-                        }}>
-                          {item}
-                        </span>
-                      ))}</TableCell>
-                      <TableCell align="right">{row.Total}</TableCell>
-                      <TableCell align="right">{row.HP}</TableCell>
-                      <TableCell align="right">{row.Attack}</TableCell>
-                      <TableCell align="right">{row.Defense}</TableCell>
-                      <TableCell align="right">{row.Sp_Atk}</TableCell>
-                      <TableCell align="right">{row.Sp_Def}</TableCell>
-                      <TableCell align="right">{row.Speed}</TableCell>
+
+                      <TableCell align="right">{row.itemName}</TableCell>
+                      <TableCell align="right">{row.itemEffect}</TableCell>
+
                     </TableRow>
                   );
                 })}
@@ -388,9 +331,9 @@ export default function PokemonList() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[10,15,25]}
+          rowsPerPageOptions={[10, 15, 25]}
           component="div"
-          count={pokemons.length}
+          count={items.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
