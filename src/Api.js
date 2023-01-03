@@ -39,3 +39,11 @@ export const getItems = async (ItemType) => {
     }
   });
 };
+export const getPokemonsType = async (id) => {
+    const res = await axios.get(`${BaseUrl}/types/${id}`);
+    return res;
+  };
+  export const getTypes = async () => {
+    const res = await axios.get(`${BaseUrl}/types`);
+    return res;
+  };

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getTypes } from "../Api";
 
 export const Colors = {
   BUG: "#ab2",
@@ -22,26 +23,17 @@ export const Colors = {
   WATER: "#39f",
 };
 const Types = () => {
-  const [types, setTypes] = useState([
-    "BUG",
-    "DARK",
-    "DRAGON",
-    "ELECTRIC",
-    "FAIRY",
-    "FIGHTING",
-    "FIRE",
-    "FLYING",
-    "GHOST",
-    "GRASS",
-    "GROUND",
-    "ICE",
-    "NORMAL",
-    "POISON",
-    "PSYCHIC",
-    "ROCK",
-    "STEEL",
-    "WATER",
-  ]);
+  const [types, setTypes] = useState([]);
+  React.useEffect(() => {
+    getTypes()
+      .then((res) => {
+        setTypes(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
   return (
     <div
       style={{
@@ -50,18 +42,19 @@ const Types = () => {
     >
       {types.map((item, i) => (
         <Link
+          to={`/types/${item.Type_Id}`}
           key={i}
           style={{
             textAlign: "center",
             width: 90,
-            backgroundColor: Colors[item],
+            backgroundColor: Colors[item?.Type_Name.toUpperCase()],
             color: "white",
             marginLeft: 10,
             padding: 10,
             borderRadius: 15,
           }}
         >
-          {item}
+          {item?.Type_Name.toUpperCase()}
         </Link>
       ))}
     </div>

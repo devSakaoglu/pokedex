@@ -7,6 +7,7 @@ import Navbar from "./Compenents/Navbar";
 import HomePage from "./Pages/HomePage";
 import Types from "./Compenents/Types"
 import ItemPage from "./Pages/Items/ItemPage";
+import PokemonsType from "./Pages/PokemonsType";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Container maxWidth="xl">
           <Routes>
             <Route path="/" element={<HomePage></HomePage>}></Route>
+            <Route path="/types/:id" element={<PokemonsType></PokemonsType>}></Route>
             <Route path="/Items/:itemType" element={<ItemPage></ItemPage>}></Route>
             <Route path="/PokemonList" element={<PokemonList></PokemonList>}></Route>
             <Route path="/Types" element={<Types></Types>}></Route>

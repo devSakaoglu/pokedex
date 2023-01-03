@@ -300,7 +300,6 @@ const {itemType}=useParams()
                         scope="row"
                         padding="none"
                       >
-
                           {row.itemId}{" "}
                           <img
                             src={`https://img.pokemondb.net/sprites/items/${row.itemName.toLowerCase().trim().replaceAll(" ","-").replace("é","e")}.png`}
